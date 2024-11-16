@@ -45,17 +45,21 @@ async fn get_bytes_from_tar(tar: Builder<Vec<u8>>) -> Vec<u8> {
 }
 
 async fn create_tar(dockerfile: &PathBuf) -> Builder<Vec<u8>> {
+    let mut builder = Builder::new(Vec::new());
+    add_to_tar(dockerfile, &mut builder).await;
+    builder
+}
+
+async fn add_to_tar(file: &PathBuf, builder: &mut Builder<Vec<u8>>) {
+    let contents = read_file(file).await;
+
     let mut header = Header::new_gnu();
-    let dockerfile = read_file(dockerfile).await;
-    header.set_path("Dockerfile").unwrap();
-    header.set_size(dockerfile.len() as u64);
+    header.set_path(file).unwrap();
+    header.set_size(contents.len() as u64);
     header.set_mode(0o755);
     header.set_cksum();
 
-    let mut tar = Builder::new(Vec::new());
-    tar.append(&header, &dockerfile[..]).unwrap();
-
-    tar
+    builder.append(&header, &contents[..]).unwrap();
 }
 
 async fn read_file(dockerfile: &PathBuf) -> Vec<u8> {
