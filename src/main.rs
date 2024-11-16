@@ -13,7 +13,7 @@ use crate::config::DEVCONTAINER_ROOT;
 #[tokio::main]
 async fn main() {
     let args = config::Cli::parse();
-    let dev_container_spec_file = PathBuf::from(format!("{DEVCONTAINER_ROOT}/devcontainer.json"));
+    let dev_container_spec_file = PathBuf::from(&DEVCONTAINER_ROOT).join("devcontainer.json");
     let client: Docker = Docker::connect_with_socket_defaults().unwrap();
     let dev_container_spec = utils::get_dev_container_spec(dev_container_spec_file);
     match args.command {
